@@ -1,6 +1,7 @@
 import os
 import shutil
 import subprocess
+import uuid
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -58,7 +59,9 @@ class ToolBox:
     def __init__(self, base_dir=None):
         self.base_dir = Path(base_dir or os.getcwd())
         self.sources_dir = self.base_dir / "sources"
-        self.temp_dir = self.base_dir / "temp"
+        self.temp_root = self.base_dir / "temp"
+        self.job_dir = None
+        self.job_id = None
         self.sounds_dir = self.base_dir / "sounds"
         self.music_dir = self.base_dir / "music"
         self.resources_dir = self.base_dir / "resources"
@@ -79,7 +82,7 @@ class ToolBox:
     def ensure_project_structure(self):
         for folder in [
             self.sources_dir,
-            self.temp_dir,
+            self.temp_root,
             self.sounds_dir,
             self.music_dir,
             self.resources_dir,
@@ -95,11 +98,20 @@ class ToolBox:
             if not path.exists():
                 path.touch()
 
+    def start_job(self):
+        self.job_id = int(uuid.uuid4().int % 1000000)
+        self.job_dir = self.temp_root / f"job_{self.job_id}"
+        self.job_dir.mkdir(parents=True, exist_ok=True)
+        return str(self.job_dir)
+
     def get_temp(self):
-        return str(self.temp_dir)
+        if self.job_dir is None:
+            self.start_job()
+        return str(self.job_dir)
 
     def getTempVideoName(self):
-        return str(self.temp_dir / "temp.mp4")
+        temp_dir = Path(self.get_temp())
+        return str(temp_dir / f"temp_{uuid.uuid4().hex}.mp4")
 
     def getSOURCES(self):
         return str(self.sources_dir)
@@ -117,7 +129,7 @@ class ToolBox:
         return str(self.resources_dir / name)
 
     def build_concat_file(self, clip_paths, include_intro_outro=True):
-        concat_file = Path(self.temp_dir) / "concat.txt"
+        concat_file = Path(self.get_temp()) / "concat.txt"
         with open(concat_file, "w", encoding="utf-8") as file_handle:
             if include_intro_outro:
                 intro = self.resources_dir / "intro.mp4"
@@ -159,7 +171,7 @@ class ToolBox:
         )
 
     def concat_demuxer(self, output_file, concat_file=None):
-        concat_path = concat_file or str(Path(self.temp_dir) / "concat.txt")
+        concat_path = concat_file or str(Path(self.get_temp()) / "concat.txt")
         subprocess.run(
             [
                 "ffmpeg",

@@ -54,11 +54,13 @@ class YTPGenerator:
             return
 
         self.progress_callback = progress_callback
+        self.toolBox.start_job()
         if os.path.exists(self.OUTPUT_FILE):
             os.remove(self.OUTPUT_FILE)
 
         num_effects = self.number_effects_selected()
         job_dir = self.toolBox.get_temp()
+        print(f"poop_{self.toolBox.job_id}")
         os.makedirs(job_dir, exist_ok=True)
 
         def process_clip(i):
@@ -165,8 +167,8 @@ class YTPGenerator:
             func(clip)
 
     def clean_up(self):
-        job_dir = self.toolBox.get_temp()
-        if os.path.exists(job_dir):
+        job_dir = self.toolBox.job_dir
+        if job_dir and os.path.exists(job_dir):
             shutil.rmtree(job_dir)
 
     def number_effects_selected(self):
