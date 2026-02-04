@@ -108,15 +108,16 @@ class YTPGenerator:
         with ThreadPoolExecutor() as executor:
             executor.map(process_clip, range(self.MAX_CLIPS))
 
-        concat_file = os.path.join(job_dir, "concat.txt")
-        with open(concat_file, "w", encoding="utf-8") as file_handle:
-            for i in range(self.MAX_CLIPS):
-                clip_path = os.path.join(job_dir, f"video{i}.mp4")
-                if os.path.exists(clip_path):
-                    file_handle.write(f"file 'video{i}.mp4'\n")
+        clip_paths = []
+        for i in range(self.MAX_CLIPS):
+            clip_path = os.path.join(job_dir, f"video{i}.mp4")
+            if os.path.exists(clip_path):
+                clip_paths.append(clip_path)
+
+        concat_file = self.toolBox.build_concat_file(clip_paths, include_intro_outro=True)
 
         try:
-            self.toolBox.concat_demuxer(self.OUTPUT_FILE)
+            self.toolBox.concat_demuxer(self.OUTPUT_FILE, concat_file=concat_file)
         finally:
             self.clean_up()
             self._update_progress(1.0 / (self.MAX_CLIPS + 1))

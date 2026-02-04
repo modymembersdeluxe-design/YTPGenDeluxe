@@ -36,6 +36,7 @@ output/
 - `resources/spadinner_sounds`
 
 It also creates placeholders for `resources/intro.mp4` and `resources/outro.mp4`.
+If those files contain media, they are automatically prepended/appended during concat.
 
 ## Running
 

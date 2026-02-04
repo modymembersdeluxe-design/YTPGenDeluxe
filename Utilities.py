@@ -115,6 +115,23 @@ class ToolBox:
     def get_resource_subdir(self, name):
         return str(self.resources_dir / name)
 
+    def build_concat_file(self, clip_paths, include_intro_outro=True):
+        concat_file = Path(self.temp_dir) / "concat.txt"
+        with open(concat_file, "w", encoding="utf-8") as file_handle:
+            if include_intro_outro:
+                intro = self.resources_dir / "intro.mp4"
+                if intro.exists() and intro.stat().st_size > 0:
+                    file_handle.write(f"file '{intro.as_posix()}'\n")
+
+            for clip_path in clip_paths:
+                file_handle.write(f"file '{Path(clip_path).as_posix()}'\n")
+
+            if include_intro_outro:
+                outro = self.resources_dir / "outro.mp4"
+                if outro.exists() and outro.stat().st_size > 0:
+                    file_handle.write(f"file '{outro.as_posix()}'\n")
+        return str(concat_file)
+
     def preview(self, output_file):
         subprocess.run(["ffplay", output_file], check=True)
 
@@ -140,8 +157,8 @@ class ToolBox:
             check=True,
         )
 
-    def concat_demuxer(self, output_file):
-        concat_file = Path(self.temp_dir) / "concat.txt"
+    def concat_demuxer(self, output_file, concat_file=None):
+        concat_path = concat_file or str(Path(self.temp_dir) / "concat.txt")
         subprocess.run(
             [
                 "ffmpeg",
@@ -151,7 +168,7 @@ class ToolBox:
                 "-safe",
                 "0",
                 "-i",
-                str(concat_file),
+                concat_path,
                 "-c",
                 "copy",
                 output_file,
