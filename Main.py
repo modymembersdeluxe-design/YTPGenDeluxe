@@ -169,6 +169,16 @@ class YTPDeluxeApp(tk.Tk):
             side="right", padx=4
         )
 
+        mode_frame = ttk.Frame(self.output_tab)
+        mode_frame.pack(fill="x", pady=4)
+
+        ttk.Button(mode_frame, text="Generate YTP+", command=self._generate_plus).pack(
+            side="left", padx=4
+        )
+        ttk.Button(mode_frame, text="Generate Chaos Small Export", command=self._generate_chaos).pack(
+            side="right", padx=4
+        )
+
     def _build_advanced_tab(self):
         advanced_frame = ttk.LabelFrame(self.advanced_tab, text="Advanced Options", padding=8)
         advanced_frame.pack(fill="both", expand=True)
@@ -266,12 +276,34 @@ class YTPDeluxeApp(tk.Tk):
             messagebox.showerror("FFplay Missing", "FFplay not found. Please install FFmpeg.")
 
     def _generate(self):
+        self._generate_with_mode()
+
+    def _generate_plus(self):
+        self._generate_with_mode(effect_probability=70, max_stack_level=5)
+
+    def _generate_chaos(self):
+        self._generate_with_mode(force_chaos=True)
+
+    def _generate_with_mode(self, effect_probability=None, max_stack_level=None, force_chaos=False):
         if not self.sources:
             messagebox.showwarning("No Sources", "Please add at least one source video.")
             return
 
         output_file = self.output_entry.get().strip()
         self._sync_settings()
+
+        if effect_probability is not None:
+            self.settings.effect_probability = int(effect_probability)
+            self.effect_probability.set(int(effect_probability))
+
+        if max_stack_level is not None:
+            self.settings.max_stack_level = int(max_stack_level)
+            self.max_stack.set(int(max_stack_level))
+
+        effects = list(self.settings.effects_enabled)
+        if force_chaos and len(effects) > 29:
+            effects = [False] * len(effects)
+            effects[29] = True
 
         generator = YTPGenerator(
             util=self.tool_box,
@@ -284,7 +316,7 @@ class YTPDeluxeApp(tk.Tk):
             effect_probability=self.settings.effect_probability,
             allow_effect_stacking=self.settings.allow_effect_stacking,
             max_stack_level=self.settings.max_stack_level,
-            effects=self.settings.effects_enabled,
+            effects=effects,
         )
         for source in self.sources:
             generator.add_source(source)
