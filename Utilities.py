@@ -17,7 +17,7 @@ class YTPSettings:
     max_stack_level: int = 3
     preserve_original_audio: bool = True
     ytp_effects_name: str = "Default"
-    effects_enabled: list[bool] = field(default_factory=lambda: [True] * 20)
+    effects_enabled: list[bool] = field(default_factory=lambda: [True] * 29)
 
     def effect_names(self):
         return [
@@ -41,6 +41,15 @@ class YTPSettings:
             "Loop Frames",
             "Shuffle Frames",
             "Audio Crust",
+            "Image Overlay (resources/images)",
+            "Meme Overlay (resources/memes)",
+            "Meme Sound (resources/meme_sounds)",
+            "Resource Sound Mix (resources/sounds)",
+            "Overlay Video (resources/overlay_videos)",
+            "Advert Overlay (resources/adverts)",
+            "Error/Glitch Overlay (resources/errors)",
+            "Spadinner Overlay (resources/spadinner)",
+            "Spadinner Sound (resources/spadinner_sounds)",
         ]
 
 
@@ -99,6 +108,12 @@ class ToolBox:
 
     def getMUSIC(self):
         return str(self.music_dir)
+
+    def get_resources_dir(self):
+        return str(self.resources_dir)
+
+    def get_resource_subdir(self, name):
+        return str(self.resources_dir / name)
 
     def preview(self, output_file):
         subprocess.run(["ffplay", output_file], check=True)

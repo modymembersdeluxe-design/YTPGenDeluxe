@@ -37,7 +37,8 @@ class YTPGenerator:
         self.allowEffectStacking = allow_effect_stacking
         self.maxEffectStackLevel = max_stack_level
 
-        self.effects = effects or [True] * 20
+        self.effects = effects or [True] * 29
+        self.effects_count = len(self.effects)
 
         self.done = False
         self.doneCount = 0
@@ -87,11 +88,11 @@ class YTPGenerator:
                     if self.allowEffectStacking:
                         stack_level = random.randint(1, min(num_effects, self.maxEffectStackLevel))
 
-                    visited = [False] * 20
+                    visited = [False] * self.effects_count
                     for _ in range(stack_level):
                         invalid_effect = True
                         while invalid_effect:
-                            effect = random.randint(0, 19)
+                            effect = random.randint(0, self.effects_count - 1)
                             if self.effects[effect] and not visited[effect]:
                                 self.apply_effect(clip_to_work_with, effect)
                                 visited[effect] = True
@@ -147,6 +148,15 @@ class YTPGenerator:
             17: self.effectsFactory.effect_loop_frames,
             18: self.effectsFactory.effect_shuffle_frames,
             19: self.effectsFactory.effect_audio_crust,
+            20: self.effectsFactory.effect_overlay_image,
+            21: self.effectsFactory.effect_overlay_meme,
+            22: self.effectsFactory.effect_meme_sound,
+            23: self.effectsFactory.effect_resource_sound,
+            24: self.effectsFactory.effect_overlay_video,
+            25: self.effectsFactory.effect_advert_overlay,
+            26: self.effectsFactory.effect_error_overlay,
+            27: self.effectsFactory.effect_spadinner_overlay,
+            28: self.effectsFactory.effect_spadinner_sound,
         }
         func = effect_map.get(effect)
         if func:

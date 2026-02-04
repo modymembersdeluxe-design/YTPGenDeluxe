@@ -19,6 +19,15 @@ class EffectsFactory:
         files = list(Path(self.tool_box.getMUSIC()).glob("*.mp3"))
         return str(random.choice(files))
 
+    def pick_resource_file(self, folder_name, patterns):
+        base = Path(self.tool_box.get_resource_subdir(folder_name))
+        files = []
+        for pattern in patterns:
+            files.extend(base.glob(pattern))
+        if not files:
+            raise FileNotFoundError(f"No matching assets found in resources/{folder_name}")
+        return str(random.choice(files))
+
     def run_ffmpeg(self, *args):
         subprocess.run(["ffmpeg", *args, "-v", "warning", "-nostdin", "-y"], check=True)
 
@@ -267,6 +276,82 @@ class EffectsFactory:
                 str(temp),
                 "-af",
                 "volume=8,highpass=f=200,lowpass=f=3000",
+                str(video),
+            )
+        finally:
+            temp.unlink(missing_ok=True)
+
+    def effect_overlay_image(self, video):
+        overlay = self.pick_resource_file("images", ["*.png", "*.jpg", "*.jpeg", "*.webp", "*.gif"])
+        self._overlay_visual(video, overlay, loop=True)
+
+    def effect_overlay_meme(self, video):
+        overlay = self.pick_resource_file("memes", ["*.png", "*.jpg", "*.jpeg", "*.webp", "*.gif"])
+        self._overlay_visual(video, overlay, loop=True)
+
+    def effect_meme_sound(self, video):
+        sound = self.pick_resource_file("meme_sounds", ["*.mp3", "*.wav", "*.ogg"])
+        self._overlay_audio(video, sound)
+
+    def effect_resource_sound(self, video):
+        sound = self.pick_resource_file("sounds", ["*.mp3", "*.wav", "*.ogg"])
+        self._overlay_audio(video, sound)
+
+    def effect_overlay_video(self, video):
+        overlay = self.pick_resource_file("overlay_videos", ["*.mp4", "*.webm", "*.mov", "*.mkv"])
+        self._overlay_visual(video, overlay, loop=False)
+
+    def effect_advert_overlay(self, video):
+        overlay = self.pick_resource_file("adverts", ["*.mp4", "*.webm", "*.mov", "*.mkv"])
+        self._overlay_visual(video, overlay, loop=False)
+
+    def effect_error_overlay(self, video):
+        overlay = self.pick_resource_file("errors", ["*.mp4", "*.webm", "*.mov", "*.mkv", "*.png", "*.jpg"])
+        self._overlay_visual(video, overlay, loop=overlay.lower().endswith((".png", ".jpg", ".jpeg", ".webp", ".gif")))
+
+    def effect_spadinner_overlay(self, video):
+        overlay = self.pick_resource_file("spadinner", ["*.mp4", "*.webm", "*.mov", "*.mkv", "*.png", "*.jpg"])
+        self._overlay_visual(video, overlay, loop=overlay.lower().endswith((".png", ".jpg", ".jpeg", ".webp", ".gif")))
+
+    def effect_spadinner_sound(self, video):
+        sound = self.pick_resource_file("spadinner_sounds", ["*.mp3", "*.wav", "*.ogg"])
+        self._overlay_audio(video, sound)
+
+    def _overlay_visual(self, video, overlay, loop):
+        temp = Path(self.tool_box.getTempVideoName())
+        Path(video).rename(temp)
+        try:
+            input_args = ["-i", str(temp), "-i", overlay]
+            if loop:
+                input_args = ["-i", str(temp), "-loop", "1", "-i", overlay]
+            self.run_ffmpeg(
+                *input_args,
+                "-filter_complex",
+                "[1:v]scale=iw*0.3:ih*0.3[ov];"
+                "[0:v][ov]overlay=W-w-20:H-h-20:shortest=1",
+                "-map",
+                "0:a?",
+                str(video),
+            )
+        finally:
+            temp.unlink(missing_ok=True)
+
+    def _overlay_audio(self, video, sound):
+        temp = Path(self.tool_box.getTempVideoName())
+        Path(video).rename(temp)
+        try:
+            self.run_ffmpeg(
+                "-i",
+                str(temp),
+                "-i",
+                sound,
+                "-filter_complex",
+                "[0:a][1:a]amix=inputs=2:duration=shortest[aout]",
+                "-map",
+                "0:v",
+                "-map",
+                "[aout]",
+                "-shortest",
                 str(video),
             )
         finally:
