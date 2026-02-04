@@ -45,7 +45,7 @@ class YTPSettings:
 
 
 class ToolBox:
-    def __init__(self, base_dir: str | None = None):
+    def __init__(self, base_dir=None):
         self.base_dir = Path(base_dir or os.getcwd())
         self.sources_dir = self.base_dir / "sources"
         self.temp_dir = self.base_dir / "temp"
