@@ -37,7 +37,7 @@ class YTPGenerator:
         self.allowEffectStacking = allow_effect_stacking
         self.maxEffectStackLevel = max_stack_level
 
-        self.effects = effects or [True] * 29
+        self.effects = effects or [True] * 30
         self.effects_count = len(self.effects)
 
         self.done = False
@@ -158,6 +158,7 @@ class YTPGenerator:
             26: self.effectsFactory.effect_error_overlay,
             27: self.effectsFactory.effect_spadinner_overlay,
             28: self.effectsFactory.effect_spadinner_sound,
+            29: self.effectsFactory.effect_chaos_small_export,
         }
         func = effect_map.get(effect)
         if func:

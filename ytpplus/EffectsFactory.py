@@ -317,6 +317,26 @@ class EffectsFactory:
         sound = self.pick_resource_file("spadinner_sounds", ["*.mp3", "*.wav", "*.ogg"])
         self._overlay_audio(video, sound)
 
+    def effect_chaos_small_export(self, video):
+        temp = Path(self.tool_box.getTempVideoName())
+        Path(video).rename(temp)
+        try:
+            self.run_ffmpeg(
+                "-i",
+                str(temp),
+                "-filter_complex",
+                "[0:v]fps=20,scale=iw*0.6:ih*0.6,eq=contrast=1.4:saturation=1.6,noise=alls=20:allf=t[v];"
+                "[0:a]aecho=0.8:0.9:60:0.4,asetrate=44100*1.05,atempo=0.95,volume=1.4[a]",
+                "-map",
+                "[v]",
+                "-map",
+                "[a]",
+                "-shortest",
+                str(video),
+            )
+        finally:
+            temp.unlink(missing_ok=True)
+
     def _overlay_visual(self, video, overlay, loop):
         temp = Path(self.tool_box.getTempVideoName())
         Path(video).rename(temp)

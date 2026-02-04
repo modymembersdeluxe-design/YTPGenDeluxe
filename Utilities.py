@@ -17,7 +17,7 @@ class YTPSettings:
     max_stack_level: int = 3
     preserve_original_audio: bool = True
     ytp_effects_name: str = "Default"
-    effects_enabled: list[bool] = field(default_factory=lambda: [True] * 29)
+    effects_enabled: list[bool] = field(default_factory=lambda: [True] * 30)
 
     def effect_names(self):
         return [
@@ -50,6 +50,7 @@ class YTPSettings:
             "Error/Glitch Overlay (resources/errors)",
             "Spadinner Overlay (resources/spadinner)",
             "Spadinner Sound (resources/spadinner_sounds)",
+            "YTP Generated Chaos (small export)",
         ]
 
 

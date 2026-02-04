@@ -3,7 +3,7 @@
 YTP Deluxe Edition is a Python/Tkinter front-end for a Windows 7/8.1-compatible YouTube Poop (YTP) editor. It provides:
 
 - Source browsers for video, audio, image/GIF files plus a list for online URLs.
-- Toggleable audio/video effects (random sound, reverse, speed up/down, chorus, vibrato, and resource overlays).
+- Toggleable audio/video effects (random sound, reverse, speed up/down, chorus, vibrato, resource overlays, and chaos export).
 - Randomized clip generator with configurable clip duration, count, and effect probability.
 - FFmpeg-based export pipeline with FFplay preview support.
 
