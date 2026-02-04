@@ -176,6 +176,8 @@ class ToolBox:
             ],
             check=True,
         )
+        if not self.has_audio_stream(output_file):
+            self.add_silent_audio(output_file)
 
     def get_length(self, source):
         result = subprocess.run(
@@ -194,3 +196,47 @@ class ToolBox:
             check=True,
         )
         return result.stdout.strip()
+
+    def has_audio_stream(self, source):
+        result = subprocess.run(
+            [
+                "ffprobe",
+                "-v",
+                "error",
+                "-select_streams",
+                "a",
+                "-show_entries",
+                "stream=codec_type",
+                "-of",
+                "csv=p=0",
+                source,
+            ],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        return bool(result.stdout.strip())
+
+    def add_silent_audio(self, source):
+        temp_path = Path(source).with_suffix(".audio.mp4")
+        subprocess.run(
+            [
+                "ffmpeg",
+                "-y",
+                "-i",
+                source,
+                "-f",
+                "lavfi",
+                "-i",
+                "anullsrc=channel_layout=stereo:sample_rate=44100",
+                "-shortest",
+                "-c:v",
+                "copy",
+                "-c:a",
+                "aac",
+                str(temp_path),
+            ],
+            check=True,
+        )
+        Path(source).unlink(missing_ok=True)
+        temp_path.replace(source)
